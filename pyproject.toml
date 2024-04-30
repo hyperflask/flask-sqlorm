@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Flask integration for sqlorm"
 authors = ["Maxime Bouroumeau-Fuseau <maxime.bouroumeau@gmail.com>"]
 readme = "README.md"
+license = "MIT"
+repository = "https://github.com/hyperflask/flask-sqlorm"
 packages = [{include = "flask_sqlorm.py"}]
 
 [tool.poetry.dependencies]

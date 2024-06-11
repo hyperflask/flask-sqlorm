@@ -11,27 +11,27 @@ from werkzeug.local import LocalProxy
 
 class FlaskSQLORM:
     def __init__(self, app=None, *args, **kwargs):
-        if app:
-            self.init_app(app, *args, **kwargs)
-
-    def init_app(self, app, database_uri="sqlite://:memory:", **engine_kwargs):
-        self.app = app
-
         for key in dir(sqlorm):
             if not key.startswith("_") and not hasattr(self, key):
                 setattr(self, key, getattr(sqlorm, key))
+        self.Model = Model
+        if app:
+            self.init_app(app, *args, **kwargs)
+
+    def init_app(self, app, database_uri="sqlite://:memory:", migrations_folder="migrations", **engine_kwargs):
+        self.app = app
 
         config = app.config.get_namespace("SQLORM_")
         database_uri = config.pop("uri", database_uri)
         for key, value in engine_kwargs.items():
             config.setdefault(key, value)
         config.setdefault("logger", app.logger)
-        if database_uri.startswith("sqlite://"):
+        if database_uri.startswith("sqlite://") and not app.debug:
             config.setdefault("fine_tune", True)
 
         self.engine = Engine.from_uri(database_uri, **config)
         self.session = LocalProxy(get_current_session)
-        self.Model = Model.bind(self.engine)
+        self.migrations_folder = os.path.join(app.root_path, migrations_folder)
 
         @app.before_request
         def start_db_session():
@@ -84,14 +84,14 @@ class FlaskSQLORM:
             create_all(**kwargs)
 
     def init_db(self, **kwargs):
-        kwargs.setdefault("path", os.path.join(self.app.root_path, "migrations"))
+        kwargs.setdefault("path", self.migrations_folder)
         kwargs.setdefault("model_registry", self.Model.__model_registry__)
         kwargs.setdefault("logger", self.app.logger)
         with self.engine:
             init_db(**kwargs)
 
     def migrate(self, **kwargs):
-        kwargs.setdefault("path", os.path.join(self.app.root_path, "migrations"))
+        kwargs.setdefault("path", self.migrations_folder)
         kwargs.setdefault("logger", self.app.logger)
         with self.engine:
             migrate(**kwargs)

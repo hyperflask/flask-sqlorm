@@ -9,8 +9,8 @@ repository = "https://github.com/hyperflask/flask-sqlorm"
 packages = [{include = "flask_sqlorm.py"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-sqlorm-py = "^0.1.2"
+python = "^3.10"
+sqlorm-py = "^0.2.0"
 flask = "^3.0.0"
 
 [tool.poetry.group.dev.dependencies]

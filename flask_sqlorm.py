@@ -23,6 +23,7 @@ class FlaskSQLORM:
 
         config = app.config.get_namespace("SQLORM_")
         database_uri = config.pop("uri", database_uri)
+        migrations_folder = config.pop("migrations_folder", migrations_folder)
         for key, value in engine_kwargs.items():
             config.setdefault(key, value)
         config.setdefault("logger", app.logger)

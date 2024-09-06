@@ -1,10 +1,12 @@
 from sqlorm import Engine, Model as _Model, get_current_session, init_db, migrate, create_all
 from sqlorm.engine import session_context
+from sqlorm.types import Encrypted as BaseEncrypted
 import sqlorm
 import abc
 import os
 import click
-from flask import g, abort, has_request_context
+import hashlib
+from flask import g, abort, has_request_context, current_app
 from flask.cli import AppGroup
 from werkzeug.local import LocalProxy
 
@@ -15,6 +17,7 @@ class FlaskSQLORM:
             if not key.startswith("_") and not hasattr(self, key):
                 setattr(self, key, getattr(sqlorm, key))
         self.Model = Model
+        self.Encrypted = Encrypted
         if app:
             self.init_app(app, *args, **kwargs)
 
@@ -112,3 +115,10 @@ class Model(_Model, abc.ABC):
         if not obj:
             abort(404)
         return obj
+
+
+class Encrypted(BaseEncrypted):
+    def __init__(self, key=None):
+        if not key:
+            key = lambda: current_app.config.get("SQLORM_ENCRYPTION_KEY") or hashlib.md5(current_app.config["SECRET_KEY"].encode()).digest()
+        super().__init__(key)

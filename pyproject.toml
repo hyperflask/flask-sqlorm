@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flask-sqlorm"
-version = "0.1.1"
+version = "0.1.2"
 description = "Flask integration for sqlorm"
 authors = ["Maxime Bouroumeau-Fuseau <maxime.bouroumeau@gmail.com>"]
 readme = "README.md"
@@ -10,7 +10,7 @@ packages = [{include = "flask_sqlorm.py"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-sqlorm-py = "^0.2.0"
+sqlorm-py = "^0.2.2"
 flask = "^3.0.0"
 
 [tool.poetry.group.dev.dependencies]

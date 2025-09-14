@@ -1,5 +1,5 @@
 from flask import Flask, render_template_string, request, redirect, url_for
-from flask_sqlorm import FlaskSQLORM
+from flask_sqlorm import FlaskSQLORM, PrimaryKey
 import logging
 
 
@@ -9,7 +9,7 @@ db = FlaskSQLORM(app)
 
 
 class Task(db.Model):
-    id: db.PrimaryKey[int]
+    id: PrimaryKey[int]
     title: str
     done: bool
 

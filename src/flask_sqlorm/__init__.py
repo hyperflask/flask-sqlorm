@@ -1,14 +1,19 @@
-from sqlorm import Engine, Model as _Model, get_current_session, init_db, migrate, create_all
+from sqlorm import Engine, Model as _Model, get_current_session, init_db, migrate, create_all, PrimaryKey as PrimaryKey
 from sqlorm.engine import session_context
-from sqlorm.types import Encrypted as BaseEncrypted
+from sqlorm.schema import create_initial_migration, set_schema_version
 import sqlorm
 import abc
 import os
 import click
-import hashlib
-from flask import g, abort, has_request_context, current_app
+from flask import g, abort, has_request_context
 from flask.cli import AppGroup
 from werkzeug.local import LocalProxy
+
+
+try:
+    from .encrypted import Encrypted
+except ImportError:
+    Encrypted = None
 
 
 class FlaskSQLORM:
@@ -30,8 +35,9 @@ class FlaskSQLORM:
         for key, value in engine_kwargs.items():
             config.setdefault(key, value)
         config.setdefault("logger", app.logger)
-        if database_uri.startswith("sqlite://") and not app.debug:
-            config.setdefault("fine_tune", True)
+        if database_uri.startswith("sqlite://"):
+            config.setdefault("fine_tune", not app.debug)
+            config.setdefault("foreign_keys", True)
 
         self.engine = Engine.from_uri(database_uri, **config)
         self.session = LocalProxy(get_current_session)
@@ -54,6 +60,13 @@ class FlaskSQLORM:
         def init():
             """Initializes the database, either creating tables for models or running migrations if some exists"""
             self.init_db()
+
+        @cli.command()
+        @click.option("--version", default="000")
+        @click.option("--set-version", is_flag=True)
+        def init_migrations(version, set_version):
+            """Initializes migrations"""
+            self.init_migrations(version=version, set_version=set_version)
 
         @cli.command()
         def create_all():
@@ -94,6 +107,13 @@ class FlaskSQLORM:
         with self.engine:
             init_db(**kwargs)
 
+    def init_migrations(self, version="000", set_version=False):
+        os.makedirs(self.migrations_folder, exist_ok=True)
+        create_initial_migration(path=self.migrations_folder, version=version)
+        if set_version:
+            with self.engine:
+                set_schema_version(version)
+
     def migrate(self, **kwargs):
         kwargs.setdefault("path", self.migrations_folder)
         kwargs.setdefault("logger", self.app.logger)
@@ -115,10 +135,3 @@ class Model(_Model, abc.ABC):
         if not obj:
             abort(404)
         return obj
-
-
-class Encrypted(BaseEncrypted):
-    def __init__(self, key=None):
-        if not key:
-            key = lambda: current_app.config.get("SQLORM_ENCRYPTION_KEY") or hashlib.md5(current_app.config["SECRET_KEY"].encode()).digest()
-        super().__init__(key)

@@ -1,28 +1,37 @@
-[tool.poetry]
+[project]
 name = "flask-sqlorm"
-version = "0.1.2"
+version = "0.2.0"
 description = "Flask integration for sqlorm"
-authors = ["Maxime Bouroumeau-Fuseau <maxime.bouroumeau@gmail.com>"]
+authors = [
+    {"name" = "Maxime Bouroumeau-Fuseau", email = "maxime.bouroumeau@gmail.com"}
+]
 readme = "README.md"
 license = "MIT"
-repository = "https://github.com/hyperflask/flask-sqlorm"
-packages = [{include = "flask_sqlorm.py"}]
+requires-python = ">=3.10"
+dependencies = [
+    "flask~=3.0",
+    "sqlorm-py~=0.2"
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-sqlorm-py = "^0.2.2"
-flask = "^3.0.0"
+[project.urls]
+Repository = "https://github.com/hyperflask/flask-sqlorm"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
-pytest-cov = "^4.1.0"
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.12.4",
+]
+postgresql = [
+    "psycopg[binary]>=3.1.18,<4.0.0"
+]
+mysql = [
+    "mysql-connector-python>=8.3.0,<9.0.0"
+]
 
-[tool.poetry.group.postgresql.dependencies]
-psycopg = {extras = ["binary"], version = "^3.1.18"}
-
-[tool.poetry.group.mysql.dependencies]
-mysql-connector-python = "^8.3.0"
+[tool.ruff]
+line-length = 100
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"

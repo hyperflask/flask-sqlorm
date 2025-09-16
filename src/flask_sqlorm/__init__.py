@@ -36,7 +36,7 @@ class FlaskSQLORM:
             config.setdefault(key, value)
         config.setdefault("logger", app.logger)
         if database_uri.startswith("sqlite://"):
-            config.setdefault("fine_tune", not app.debug)
+            config.setdefault("fine_tune", True)
             config.setdefault("foreign_keys", True)
 
         self.engine = Engine.from_uri(database_uri, **config)
@@ -97,14 +97,14 @@ class FlaskSQLORM:
 
     def create_all(self, **kwargs):
         kwargs.setdefault("model_registry", self.Model.__model_registry__)
-        with self.engine:
+        with self.app.app_context(), self.engine:
             create_all(**kwargs)
 
     def init_db(self, **kwargs):
         kwargs.setdefault("path", self.migrations_folder)
         kwargs.setdefault("model_registry", self.Model.__model_registry__)
         kwargs.setdefault("logger", self.app.logger)
-        with self.engine:
+        with self.app.app_context(), self.engine:
             init_db(**kwargs)
 
     def init_migrations(self, version="000", set_version=False):

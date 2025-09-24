@@ -65,6 +65,16 @@ Model classes have the additional methods:
 
 Some CLI commands are available under the *db* command group. Check out `flask db --help` for a list of subcommands.
 
+## SQLite defaults
+
+If using an SQLite database, the following settings will be applied:
+
+ - foreign_keys are ON
+ - [fine tuning](https://fractaledmind.github.io/2023/09/07/enhancing-rails-sqlite-fine-tuning/) for web workloads
+ - the database directory will be created if missing
+
+These settings are provided by the [SQLORM SQLite driver](https://hyperflask.github.io/sqlorm/drivers/#sqlite).
+
 ## Configuration
 
 Configure the sqlorm engine using the extension's constructor or `init_app()`. Configuration of the engine is performed using the URI method.

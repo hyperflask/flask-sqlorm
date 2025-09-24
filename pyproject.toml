@@ -1,6 +1,6 @@
 [project]
 name = "flask-sqlorm"
-version = "0.3.0"
+version = "0.3.1"
 description = "Flask integration for sqlorm"
 authors = [
     {"name" = "Maxime Bouroumeau-Fuseau", email = "maxime.bouroumeau@gmail.com"}

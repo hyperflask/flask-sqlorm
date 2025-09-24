@@ -105,6 +105,7 @@ class FlaskSQLORM:
         if database_uri.startswith("sqlite://"):
             engine_kwargs.setdefault("fine_tune", True)
             engine_kwargs.setdefault("foreign_keys", True)
+            engine_kwargs.setdefault("ensure_path", True)
         return Engine.from_uri(database_uri, **engine_kwargs)
 
     def __enter__(self):
